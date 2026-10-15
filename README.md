@@ -23,6 +23,8 @@ Reference: [GitHub’s publishing-source instructions](https://docs.github.com/e
 
 ## What is interactive
 
+- Beginner chapter: vectors, dot products, Gram matrices, determinants, duals, discriminant classes, and an interactive even-overlattice example; concludes with the real 169-vertex parity obstruction.
+
 - Petersen and 3×3 rook graphs: select vertices, inspect common neighbours and centred Gram matrices for both eigenspaces.
 - A₂ lattice: change integer coefficients and show the dual lattice’s extra cosets.
 - Parameter calculator: Djematene’s Theorem 1 / mod-4 corollary with explicit hypotheses, prime-to-gap factor, and separate eigenspace results.

@@ -40,4 +40,27 @@ const example=M.assess([169,42,5,12]);check(example.sp.r===3&&example.sp.s===-10
 for(const [key,phase] of Object.entries({a2:2,a1:1,p5:0,p5n:4,d4:4,e8:0})){
  const g=M.gauss(M.modules[key].q);check(g.phase===phase,`${key} phase`);check(Math.abs(g.re*g.re+g.im*g.im-1)<1e-12,`${key} normalized magnitude`);
 }
+
+// Verify the mathematical examples taught in the beginner chapter.
+const dualClasses=[];
+for(let a=0;a<4;a++)for(let b=0;b<4;b++)dualClasses.push([a/2,b/2]);
+check(dualClasses.length===16,'2Z² has 16 dual cosets');
+const isotropic=dualClasses.filter(([x,y])=>(x*x+y*y)%2===0);
+check(JSON.stringify(isotropic)===JSON.stringify([[0,0],[1,1]]),'exactly one nonzero isotropic class');
+for(const [x,y] of dualClasses)for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++)check(((x+2*a)**2+(y+2*b)**2-x*x-y*y)%2===0,'q is invariant modulo 2 under translating by L');
+for(const [x,y] of [[.5,0],[1,0],[1,1]])check(Number.isInteger(2*x)&&Number.isInteger(2*y),'all candidates are in dual');
+check(16/(2*2)===4,'index two enlargement divides determinant by four');
+const mRepresentatives=[[0,0],[.5,.5],[.5,-.5],[1,0]];
+check(mRepresentatives.slice(1).every(([x,y])=>(x*x+y*y)%2!==0),'M discriminant form is anisotropic');
+for(let i=0;i<4;i++)for(let j=0;j<i;j++){const x=mRepresentatives[i][0]-mRepresentatives[j][0],y=mRepresentatives[i][1]-mRepresentatives[j][1];check(!(Number.isInteger(x)&&Number.isInteger(y)&&(x+y)%2===0),'four inequivalent M dual cosets');}
+const spec169=M.spectrum(169,42,5,12);
+check(spec169.s===-10&&spec169.g===42,'beginner example rank 42');
+const b169=-13,c169=3,rho169=3,e169=b169*(spec169.s-rho169);
+check(e169===169&&b169*(42-rho169)+c169*169===0&&c169-b169*rho169===42,'169 centred representation');
+const i169=-b169*rho169;
+check(i169*i169+b169*b169*(42-12)===e169*i169,'169 Gram polynomial I coefficient');
+check(2*i169*b169+b169*b169*(5-12)===e169*b169,'169 Gram polynomial A coefficient');
+check(b169*b169*12+2*i169*c169+2*b169*c169*42+c169*c169*169===e169*c169,'169 Gram polynomial J coefficient');
+check(13%4===1&&(((-1)**21)%4+4)%4===3,'169 determinant contradiction');
+
 console.log(`PASS: ${checks} assertions. Graphs, Gram identities, all 70 table pairs and complements, known-graph controls, domain guards, Gauss sums.`);

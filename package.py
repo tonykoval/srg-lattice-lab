@@ -28,7 +28,7 @@ for link in page.links:
         assert (root / unquote(url.path)).is_file(), 'missing asset: ' + link
     elif url.fragment:
         assert url.fragment in page.ids, 'missing anchor: ' + link
-files = ['index.html', 'style.css', 'math.js', 'app.js', 'data.js', 'favicon.svg',
+files = ['index.html', 'style.css', 'math.js', 'app.js', 'beginner.js', 'data.js', 'favicon.svg',
          '.nojekyll', '.gitignore', 'README.md', 'SOURCE_NOTES.md', 'test.cjs',
          'build_data.py', 'package.py', 'qa.cjs']
 archive = root.parent / 'srg-lattice-lab.zip'

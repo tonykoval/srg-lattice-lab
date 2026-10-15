@@ -40,3 +40,7 @@ The 35 Djematene pairs are contained in the project’s 70 published pairs. All 
 - Quadratic forms use q(x) = x² modulo 2ℤ, so the Gauss sum uses exp(πiq(x)), not exp(2πiq(x)). Cyclic examples are well-defined forms; no inference of a full lattice or graph construction is made from phase compatibility alone.
 - The arithmetic input limit is v ≤ 10,000 to keep every integer calculation within JavaScript’s exact integer range. This is not a full SRG feasibility checker and does not implement the full finite-module enumeration.
 - Symmetry exclusion is distinct from graph nonexistence. In particular the site does not claim to settle Conway-99 existence or independently certify the complete asymmetry claim.
+
+## Beginner chapter
+
+The rank-two teaching example starts with L = 2ℤ², Gram matrix diag(4,4), determinant 16; its dual is (½ℤ)². Adding (1,1) gives the even index-two overlattice M with Gram diag(2,2), determinant 4. Its discriminant form has values 0, ½, ½, 1 and is anisotropic. The worked (169,42,5,12) obstruction uses the project paper’s centred dual-vector identity and parity corollary: G = −13(A−3I)+3J, rank 42, G² = 169G, and 169L# ⊆ L. This is an explanation of the existing result, not a new exclusion.
