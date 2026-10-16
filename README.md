@@ -28,6 +28,7 @@ Reference: [GitHub’s publishing-source instructions](https://docs.github.com/e
 - Petersen and 3×3 rook graphs: select vertices, inspect common neighbours and centred Gram matrices for both eigenspaces.
 - A₂ lattice: change integer coefficients and show the dual lattice’s extra cosets.
 - Parameter calculator: Djematene’s Theorem 1 / mod-4 corollary with explicit hypotheses, prime-to-gap factor, and separate eigenspace results.
+- Separate lattice theory companion page following the SRG Notebook’s lattice primer → rook-graph worked example → proof-playground progression, with an interactive Gram spectrum and A₅ Milgram phase.
 - The 70-pair project snapshot, including all 35 pairs in Djematene’s table, with filters and click-to-load examples.
 - Six finite quadratic forms: normalized Gauss sums versus a user-selected rank modulo 8.
 - A five-step Conway-99 order-3 proof, with a separate explanation of the fixed-triangle case.
@@ -36,7 +37,7 @@ The site distinguishes a criterion passing, failing, and being inapplicable. The
 
 ## Files and checks
 
-- `index.html`, `style.css`, `app.js`: presentation and interactions.
+- `index.html`, `lattice-theory.html`, `style.css`, `app.js`: presentation and interactions.
 - `math.js`: pure arithmetic and graph kernels.
 - `data.js`: static public table snapshot, with source URLs.
 - `SOURCE_NOTES.md`: attribution, provenance, scope, audit status.
