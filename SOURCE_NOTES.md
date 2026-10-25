@@ -2,6 +2,13 @@
 
 Prepared 15 October 2026. This is an educational companion, not a paper, proof certificate, or an independent publication of new results.
 
+## Daijiro Obata (added 25 October 2026)
+
+- [Zenodo record 22682072](https://doi.org/10.5281/zenodo.22682072), *srg-eigenlattice-obstruction* v0.1.1, published 9 September 2026; source at [GitHub daijiro-obata/srg-eigenlattice-obstruction](https://github.com/daijiro-obata/srg-eigenlattice-obstruction).
+- A Lean 4 / Mathlib formalisation of the odd-determinant obstruction: the even eigenlattice Z^v ∩ ker(A − θI) with c_θ = (θ − k)(θ − θ′) odd has odd determinant, det Λ_r · det Λ_s · v is a square, and det ≡ (−1)^(n/2) (mod 4). It settles 35 open parameter sets, identical to Djematene’s 35 and to the odd-gap half of Kovaľ’s 70, plus (154,51,8,21) and (289,54,1,12).
+- Priority: this is the earliest of the three deposits (9 September; Kovaľ 10 October; Djematene 11 October). Neither later deposit cited it; the project comparison of 21 October 2026 verified that the 12 rows Kovaľ had settled only by computation follow from Obata’s short argument.
+- Joint paper: on 21 October 2026 A. E. Brouwer proposed that Obata, Kovaľ and Djematene write one paper; all three agreed (classical prose, computations only in an appendix). The site reports this as planned work, not a publication.
+
 ## Dilan Djematene
 
 - [Zenodo record 23305123, v1.0](https://zenodo.org/records/23305123), DOI 10.5281/zenodo.23305123, published 11 October 2026. The live Zenodo API metadata was retrieved on 15 October 2026 and matched the locally archived v1.0 source.
