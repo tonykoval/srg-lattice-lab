@@ -1,6 +1,6 @@
 # Graph → Lattice
 
-A self-contained interactive field guide to Dilan Djematene’s eigenlattice methods and Anton Kovaľ’s BMV–Milgram work in orbit-gen.
+A self-contained interactive field guide to the eigenlattice obstruction of Daijiro Obata and Dilan Djematene, Djematene’s Conway-99 symmetry methods, and Anton Kovaľ’s BMV–Milgram work in orbit-gen.
 
 Website: **https://tonykoval.github.io/srg-lattice-lab/**
 
@@ -27,6 +27,8 @@ Reference: [GitHub’s publishing-source instructions](https://docs.github.com/e
 
 - Petersen and 3×3 rook graphs: select vertices, inspect common neighbours and centred Gram matrices for both eigenspaces.
 - A₂ lattice: change integer coefficients and show the dual lattice’s extra cosets.
+- Chapter 03 (odd-determinant obstruction): Obata’s four ingredients, the worked example (630,68,1,8), a Lean-deposit explainer, the “why 12 rows” explainer, Djematene’s 2-adic version side by side, and a “what happened next” box.
+- Theorem A checker: from (v,k,λ,μ) computes eigenvalues, multiplicities, c_θ, which primes’ valuations are fixed, 𝒮 and the mod-4 verdict for both eigenvalues of the graph and its complement; presets for the 35 odd-gap sets, two known nonexistence cases, existing graphs (must not be excluded) and out-of-scope sets.
 - Parameter calculator: Djematene’s Theorem 1 / mod-4 corollary with explicit hypotheses, prime-to-gap factor, and separate eigenspace results.
 - Separate lattice theory companion page following the SRG Notebook’s lattice primer → rook-graph worked example → proof-playground progression, with an interactive Gram spectrum, an automorphism-on-vectors demo, and A₅ Milgram phase.
 - The 70-pair project snapshot, including all 35 pairs in Djematene’s table, with filters and click-to-load examples.
@@ -41,7 +43,8 @@ The site distinguishes a criterion passing, failing, and being inapplicable. The
 - `math.js`: pure arithmetic and graph kernels.
 - `data.js`: static public table snapshot, with source URLs.
 - `SOURCE_NOTES.md`: attribution, provenance, scope, audit status.
-- `test.cjs`: run `node test.cjs` for mathematical regression checks.
+- `test.cjs`: run `node test.cjs` for mathematical regression checks (including Obata’s 37-row table and existing-graph families for the Theorem A checker).
+- `qa.cjs`: run `node qa.cjs` for headless-Edge interaction and layout checks (Windows; writes screenshots to `qa/`).
 - `build_data.py`: maintainer export from the parent orbit-gen comparison. Only needed to regenerate the already included `data.js`; it deliberately requires the original project checkout.
 
 The public tables are historical snapshots from the cited papers, not a live claim about which graph parameters remain open. Update both content and source notes when changing that snapshot. Mathematical diagrams are original SVG drawings. No source manuscript programs are executed, and private project audit files are not bundled.

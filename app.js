@@ -31,3 +31,45 @@ const steps=[
 function drawProof(){const tabs=$('proof-tabs');tabs.replaceChildren();steps.forEach((st,i)=>{const b=document.createElement('button');b.textContent=`0${i+1} ${st.name}`;b.id=`proof-tab-${i}`;b.setAttribute('role','tab');b.setAttribute('aria-selected',i===step);b.setAttribute('aria-controls','proof-copy');b.tabIndex=i===step?0:-1;b.addEventListener('click',()=>{step=i;drawProof();});b.addEventListener('keydown',e=>{if(['ArrowRight','ArrowLeft','Home','End'].includes(e.key)){e.preventDefault();step=e.key==='Home'?0:e.key==='End'?4:(step+(e.key==='ArrowRight'?1:4))%5;drawProof();$(`proof-tab-${step}`).focus();}});tabs.append(b);});$('proof-copy').setAttribute('aria-labelledby',`proof-tab-${step}`);$('proof-copy').innerHTML=`<h3>${steps[step].title}</h3><p>${steps[step].text}</p>`;$('proof-art').innerHTML=steps[step].art;$('proof-count').textContent=`STEP ${step+1} OF 5`;$('proof-prev').disabled=step===0;$('proof-next').disabled=step===4;}
 $('proof-prev').addEventListener('click',()=>{if(step>0){step--;drawProof();}});$('proof-next').addEventListener('click',()=>{if(step<4){step++;drawProof();}});
 hero();drawGraph();drawLattice();runArithmetic();catalog();drawPhase();drawProof();
+/* Experiment 02: Theorem A checker (Obata's eigenlattice obstruction; our reimplementation in math.js). */
+const taNames=['ta-v','ta-k','ta-lambda','ta-mu'];
+const TWELVE=[[209,52,15,12],[441,190,89,76],[494,85,12,15],[630,68,1,8],[721,220,69,66],[750,210,55,60],[750,214,63,60],[780,369,158,189],[931,180,29,36],[1026,451,212,187],[1148,481,210,195],[1248,203,22,35]];
+const TA_PRESETS=[
+ ['The 35 open sets with odd gap',SRG_DATA.rows.filter(r=>r.shared).map(r=>[r.params.join(','),`(${r.params.join(', ')})${r.params.join(',')==='630,68,1,8'?' · Obata’s core example':''}`])],
+ ['Known nonexistence, re-derived',[['154,51,8,21','(154, 51, 8, 21) · Krein condition'],['289,54,1,12','(289, 54, 1, 12) · Bondarenko–Radchenko']]],
+ ['Existing graphs · must not be excluded',[['10,3,0,1','Petersen · (10, 3, 0, 1)'],['21,10,5,4','T(7) · (21, 10, 5, 4)'],['25,8,3,2','L2(5), 5 × 5 rook · (25, 8, 3, 2)'],['9,4,1,2','Paley(9) · (9, 4, 1, 2)'],['25,12,5,6','Paley(25) · (25, 12, 5, 6)'],['49,24,11,12','Paley(49) · (49, 24, 11, 12)'],['81,40,19,20','Paley(81) · (81, 40, 19, 20)'],['16,5,0,2','Clebsch · (16, 5, 0, 2)'],['27,10,1,5','Schläfli · (27, 10, 1, 5)'],['50,7,0,1','Hoffman–Singleton · (50, 7, 0, 1)'],['100,22,0,6','Higman–Sims · (100, 22, 0, 6)']]],
+ ['Outside the theorem',[['96,35,10,14','(96, 35, 10, 14) · even gap'],['99,14,1,2','Conway 99 · gap 7 ≡ 3 (mod 4)'],['13,6,2,3','Paley(13) · irrational eigenvalues']]]
+];
+(function(){const sel=$('ta-preset');for(const [name,items] of TA_PRESETS){const g=document.createElement('optgroup');g.label=name;for(const [value,text] of items){const o=document.createElement('option');o.value=value;o.textContent=text;g.append(o);}sel.append(g);}const c=document.createElement('option');c.value='custom';c.textContent='Custom parameter set';c.disabled=true;sel.append(c);sel.value='630,68,1,8';})();
+const taNum=x=>x<0?'−'+(-x):String(x),taParen=x=>x<0?`(${taNum(x)})`:String(x);
+function taFactor(n){if(n===0)return '0';const f=SRG.factors(Math.abs(n));return (n<0?'−':'')+(f.length?f.map(([p,e])=>e>1?`${p}<sup>${e}</sup>`:p).join('·'):'1');}
+function taSync(){const key=taNames.map(id=>$(id).value).join(',');$('ta-preset').value=Array.from($('ta-preset').options).some(o=>o.value===key&&!o.disabled)?key:'custom';}
+function taSet(p){taNames.forEach((id,i)=>$(id).value=p[i]);taSync();runTheoremA();}
+function taCard(o,t){
+ const row=(ok,text)=>`<div class="check-row"><span class="${ok?'ok':'no'}">${ok?'✓':'—'}</span><span>${text}</span></div>`;
+ const tag=t.fail?'<span class="ta-tag fires">fires</span>':t.applicable?'<span class="ta-tag">congruence holds</span>':'<span class="ta-tag muted">not applicable</span>';
+ let h=`<div class="eigen-test ta-card${t.fail?' fires':''}"><h4>θ = ${taNum(t.theta)} · rank n = ${t.n} ${tag}</h4>`;
+ h+=row(t.cOdd,`c<sub>θ</sub> = (${taNum(t.theta)} − ${o.k})(${taNum(t.theta)} − ${taParen(t.other)}) = ${taNum(t.c)} = ${taFactor(t.c)} is ${t.cOdd?'odd':'even'}`);
+ h+=row(t.blocked.length===0,t.blocked.length?`Shared with c<sub>θ′</sub> = ${taFactor(t.cOther)}: prime${t.blocked.length>1?'s':''} ${t.blocked.join(', ')} ≡ 3 (mod 4)`:`No prime ≡ 3 (mod 4) shared with c<sub>θ′</sub> = ${taFactor(t.cOther)}`);
+ const effect=x=>x.role==='two'?'c<sub>θ</sub> even: det may be even':x.role==='harmless'?'any power ≡ 1 (mod 4)':x.role==='unfixed'?'parity not fixed: blocks Theorem A':`parity = ν<sub>p</sub>(v) = ${x.vpv}, factor ≡ ${x.vpv%2?3:1}`;
+ h+=`<div class="prime-wrap"><table class="prime-table"><caption>Primes of c<sub>θ</sub>, the only primes that can divide det Λ<sub>θ</sub></caption><thead><tr><th>p</th><th>mod 4</th><th>p | c<sub>θ′</sub>?</th><th>ν<sub>p</sub>(v)</th><th>effect on det Λ<sub>θ</sub> (mod 4)</th></tr></thead><tbody>${t.primes.map(x=>`<tr class="${x.role}"><td>${x.p}</td><td>${x.p===2?'—':x.p%4}</td><td>${x.inOther?'yes':'no'}</td><td>${x.vpv}</td><td>${effect(x)}</td></tr>`).join('')}</tbody></table></div>`;
+ if(t.applicable){const fixed=t.primes.filter(x=>x.role==='fixed');h+=`<div class="formula ta-formula">𝒮 = ${fixed.length?fixed.map(x=>x.vpv).join(' + '):'0'} = ${t.S} ⇒ det Λ<sub>θ</sub> ≡ (−1)<sup>${t.S}</sup> ≡ ${t.detResidue}<br>${t.rankEven?`required: (−1)<sup>${t.nHalf}</sup> ≡ ${t.required} (mod 4)`:`rank ${t.n} is odd`}</div>`;h+=t.fail?`<strong class="no">${t.rankEven?`Contradiction: ${t.detResidue} ≢ ${t.required} (mod 4).`:'Contradiction: an even lattice of odd determinant has even rank.'}</strong>`:'<strong class="ok">Consistent: the residues agree.</strong>';}
+ else h+=`<p>Theorem A does not apply to this eigenvalue: ${!t.cOdd?'c<sub>θ</sub> is even, so the determinant need not be odd.':'a prime ≡ 3 (mod 4) divides both c-values, so the parity of its exponent is not fixed.'}</p>`;
+ const dj=t.djemHyp?`holds; P<sub>θ</sub> = ${t.P}${t.rankEven?`, (−1)<sup>${t.nHalf}</sup>·${t.P} ≡ ${t.djemResidue}`:''}, so his corollary ${t.djemFail?'fires':'is satisfied'}${t.djemFail&&!t.fail?' (here Theorem A does not apply: his hypothesis is weaker)':''}`:'does not hold';
+ h+=`<p class="ta-aside">Lean’s <code>branchD_core</code> also assumes θ odd: ${t.thetaOdd?'yes':'no, θ is even (not needed for ingredient 1)'}. Djematene’s hypothesis (d odd, ν₂(k − θ′) ≥ ν₂(v), every prime of d ≡ 1 mod 4) ${dj}.</p></div>`;
+ return h;
+}
+function runTheoremA(){
+ const p=taNames.map(id=>$(id).value.trim()===''?NaN:Number($(id).value)),R=SRG.theoremA(p);
+ const titles={excluded:'Excluded by Theorem A',passes:'No obstruction · hypotheses met, congruence holds',outside:'No obstruction · Theorem A does not apply',invalid:'Check the parameters'};
+ let h=`<div class="verdict ${R.status==='excluded'||R.status==='invalid'?'fail':R.status==='outside'?'neutral':''}"><h4>${titles[R.status]}</h4><p>${R.reason}${R.fired.length?` Fires on: ${R.fired.map(f=>`${f.orientation} (${f.params.join(', ')}), θ = ${taNum(f.theta)}`).join('; ')}.`:''}</p></div>`;
+ if(R.sp){const {r,s,f,g,d}=R.sp;h+=`<div class="spectrum"><span>r = <strong>${taNum(r)}</strong> (n = ${f})</span><span>s = <strong>${taNum(s)}</strong> (n = ${g})</span><span>gap r − s = <strong>${d}</strong> = ${taFactor(d)}</span><span>v = ${taFactor(p[0])}</span></div>`;
+  for(const o of R.orientations)h+=`<div class="ta-orientation"><h4 class="orientation-head">${o.label==='graph'?'The graph':'Its complement'} (${o.params.join(', ')}) · k = ${o.k}</h4><div class="eigen-tests">${o.tests.map(t=>taCard(o,t)).join('')}</div></div>`;
+  if(R.note)h+=`<p class="hint ta-note">${R.note}</p>`;}
+ $('ta-output').innerHTML=h;
+}
+$('ta-form').addEventListener('submit',e=>{e.preventDefault();taSync();runTheoremA();});$('ta-preset').addEventListener('change',e=>{if(e.target.value!=='custom')taSet(e.target.value.split(',').map(Number));});taNames.forEach(id=>$(id).addEventListener('input',taSync));
+const taScroll=()=>$('theoremA-lab').scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+$('load630').addEventListener('click',()=>{taSet([630,68,1,8]);taScroll();});
+(function(){const c=$('twelve');for(const p of TWELVE){const b=document.createElement('button');b.type='button';b.textContent=p.join(', ');b.title=`Load (${p.join(', ')}) into the Theorem A checker`;b.addEventListener('click',()=>{taSet(p);taScroll();});c.append(b);}})();
+runTheoremA();

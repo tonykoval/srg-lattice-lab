@@ -10,5 +10,43 @@
   function gram(params,A,key){const [v,k,l,mu]=params,sp=spectrum(v,k,l,mu),theta=sp[key],rho=sp[key==='r'?'s':'r'];let b=(theta>rho?1:-1)*v/gcd(v,k-rho),c=-b*(k-rho)/v;if((c-b*rho)%2!==0){b*=2;c*=2;}return {b,c,rho,theta,e:b*(theta-rho),rank:sp[key==='r'?'f':'g'],norm:c-b*rho,G:A.map((row,i)=>row.map((a,j)=>b*(a-(i===j?rho:0))+c))};}
   const modules={a2:{q:[0,2/3,2/3],rank:2,label:'ℤ/3, q(x) = 2x²/3'},a1:{q:[0,.5],rank:1,label:'ℤ/2, q(1) = 1/2'},p5:{q:[0,2/5,8/5,8/5,2/5],rank:8,label:'ℤ/5, q(x) = 2x²/5'},p5n:{q:[0,4/5,6/5,6/5,4/5],rank:4,label:'ℤ/5, q(x) = 4x²/5'},d4:{q:[0,1,1,1],rank:4,label:'(ℤ/2)², q = 1 on nonzero classes'},e8:{q:[0],rank:8,label:'Trivial group, q = 0'}};
   function gauss(q){const re=q.reduce((s,x)=>s+Math.cos(Math.PI*x),0)/Math.sqrt(q.length),im=q.reduce((s,x)=>s+Math.sin(Math.PI*x),0)/Math.sqrt(q.length);return {re,im,phase:(Math.round(Math.atan2(im,re)*4/Math.PI)+8)%8};}
-  const api={factors,valuation,spectrum,assess,graph,gram,modules,gauss};root.SRG=api;if(typeof module!=='undefined')module.exports=api;
+  /* Theorem A (Obata's eigenlattice obstruction, in the form of the joint-paper roadmap: Obata's hypotheses minus
+     "θ odd"). Our reimplementation, exact integer arithmetic. For each orientation (graph, complement) and each
+     restricted eigenvalue θ with multiplicity n: c = (θ − k)(θ − θ′). If c is odd and no prime p ≡ 3 (mod 4) divides
+     both c and c′, then det Λθ is odd and ≡ (−1)^S (mod 4), S = Σ νp(v) over primes p ≡ 3 (mod 4) dividing c; an
+     even lattice of odd determinant needs n even and det ≡ (−1)^(n/2). Djematene's weaker determinant-odd hypothesis
+     and his exact prime-to-gap factor P are reported alongside for comparison; they do not change the verdict. */
+  function theoremA(params){
+    const base=assess(params);
+    if(base.status==='invalid')return {status:'invalid',reason:base.reason,orientations:[],fired:[]};
+    if(!base.sp)return {status:'outside',reason:'No obstruction from Theorem A: it needs integral restricted eigenvalues, and these parameters have irrational ones (a conference graph), so there is no eigenlattice to test.',orientations:[],fired:[]};
+    const [v,k,l,mu]=params,{r,s,f,g}=base.sp,d=r-s,dPrimes=factors(d);
+    const orientations=[{label:'graph',params:[v,k,l,mu],k,r,s,f,g}];
+    const kc=v-k-1,rc=-1-s,sc=-1-r;let note='';
+    if(rc<kc)orientations.push({label:'complement',params:[v,kc,v-2*k+mu-2,v-2*k+l],k:kc,r:rc,s:sc,f:g,g:f});
+    else note='The complement is disconnected (a union of cliques), so only the graph itself is tested.';
+    for(const o of orientations){
+      o.tests=[[o.r,o.s,o.f],[o.s,o.r,o.g]].map(([theta,other,n])=>{
+        const c=(theta-o.k)*(theta-other),cOther=(other-o.k)*(other-theta);
+        const primes=factors(Math.abs(c)).map(([p,e])=>{const inOther=cOther%p===0,vpv=valuation(v,p);return {p,e,inOther,vpv,role:p===2?'two':p%4===1?'harmless':inOther?'unfixed':'fixed'};});
+        const cOdd=c%2!==0,blocked=primes.filter(x=>x.role==='unfixed').map(x=>x.p),applicable=cOdd&&blocked.length===0;
+        const S=primes.filter(x=>x.role==='fixed').reduce((a,x)=>a+x.vpv,0);
+        const rankEven=n%2===0,nHalf=rankEven?n/2:null,detResidue=S%2?3:1,required=rankEven?(nHalf%2?3:1):null;
+        const fail=applicable&&(!rankEven||detResidue!==required);
+        const djemHyp=d%2===1&&valuation(o.k-other,2)>=valuation(v,2)&&dPrimes.every(([q])=>q%4===1);
+        const P=factors(v).filter(([q,e])=>d%q!==0&&valuation(o.k-other,q)<e).reduce((a,[q,e])=>a*q**e,1);
+        const djemResidue=rankEven?(((nHalf%2?-1:1)*P)%4+4)%4:null,djemFail=djemHyp&&(!rankEven||djemResidue!==1);
+        return {theta,other,n,c,cOther,cOdd,thetaOdd:theta%2!==0,primes,blocked,applicable,S,rankEven,nHalf,detResidue,required,fail,djemHyp,P,djemResidue,djemFail};
+      });
+    }
+    const fired=[];orientations.forEach(o=>o.tests.forEach(t=>{if(t.fail)fired.push({orientation:o.label,params:o.params,theta:t.theta});}));
+    const anyApplicable=orientations.some(o=>o.tests.some(t=>t.applicable));
+    const status=fired.length?'excluded':anyApplicable?'passes':'outside';
+    const reason=status==='excluded'?'Theorem A fires: the eigenlattice would be an even lattice of odd determinant whose determinant has two different remainders modulo 4. No graph with these parameters exists.'
+      :status==='passes'?'No obstruction. The hypotheses hold for at least one eigenvalue, and the congruence is satisfied there. This does not establish existence.'
+      :d%2===0?`No obstruction from Theorem A. The gap r − s = ${d} is even and divides both c_r and c_s, so both are even and the determinant need not be odd. The stronger even-gap condition (chapter 04) is needed.`
+      :'No obstruction from Theorem A. Its hypotheses fail for every eigenvalue of the graph and of its complement.';
+    return {status,reason,sp:base.sp,d,dPrimes,orientations,fired,note};
+  }
+  const api={factors,valuation,spectrum,assess,theoremA,graph,gram,modules,gauss};root.SRG=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window==='undefined'?globalThis:window);
